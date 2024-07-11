@@ -10,6 +10,10 @@ within the next 15 minutes and alerts the user via macOS speech synthesis.
 python check_power.py <accountNumber>
 ```
 
+```bash
+*/15 * * * * /path/to/check_power.py <accountNumber>
+```
+
 ## Requirements:
     - Python 3.x requests library (install via `pip install requests`)
 
