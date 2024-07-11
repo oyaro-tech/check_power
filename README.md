@@ -7,7 +7,7 @@ within the next 15 minutes and alerts the user via macOS speech synthesis.
 ## Usage
 
 ```bash
-    python script_name.py <accountNumber>
+python check_power.py <accountNumber>
 ```
 
 ## Requirements:
