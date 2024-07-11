@@ -23,7 +23,7 @@ Notes:
 - It uses macOS specific commands (`say`) for audio alerts.
 - It handles JSON decoding errors and HTTP 404 errors from the API gracefully.
 - Be attentive hoursList start from 1 and go to 24 (python's datetime expected 0..23)
-- Electricity statuses: 0 - Power, 1 - Scheduled Power Outage, 2 - Possible Power Outage
+- Electricity statuses: 0 - Power, 1 - Scheduled Power Outage, 2 - Possible Power Outage but if we have 1 after 0 it be with no power too ;)
 
 Example of response:
 {
@@ -172,7 +172,6 @@ def main():
         "Origin": "https://svitlo.oe.if.ua",
         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15",
         "Referer": "https://svitlo.oe.if.ua/",
-        "Content-Length": "52",
         "Connection": "keep-alive",
         "Host": "svitlo.oe.if.ua",
         "Sec-Fetch-Dest": "empty",
@@ -199,20 +198,23 @@ def main():
     def check_outage(schedule):
         current_time = datetime.now()
         warning_time = current_time + timedelta(minutes=15)
-        
+
         # Initialize previous_hour_status with the last known electricity_status
+        previous_hour = current_time - timedelta(hours=1)
+
         if schedule['hoursList']:
-            previous_hour_status = int(schedule['hoursList'][-1]['electricity'])
+            previous_hour_status = int(schedule['hoursList'][previous_hour.hour]['electricity'])
         else:
             previous_hour_status = None
         
-        for hour_info in schedule['hoursList']:
+        for i, hour_info in enumerate(schedule['hoursList']):
             hour = int(hour_info['hour'])
 
             if hour == 24:
                 hour = 0
 
             electricity_status = int(hour_info['electricity'])
+            next_electricity_status = int(schedule['hoursList'][(i+1) % len(schedule['hoursList'])]['electricity'])
 
             outage_start = datetime.combine(current_time.date(), datetime.min.time()) + timedelta(hours=hour-1)
             outage_end = outage_start + timedelta(hours=1)
@@ -220,6 +222,12 @@ def main():
             if electricity_status == 0:
                 continue
             
+            # Check if the next hour indicates an outage
+            if next_electricity_status == 1:
+                electricity_status = 1
+            elif next_electricity_status == 2:
+                electricity_status = 2
+
             # Check if outage is within the next 15 minutes
             if current_time < outage_start <= warning_time and previous_hour_status == 0:
                 if electricity_status == 1:
