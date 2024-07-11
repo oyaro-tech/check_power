@@ -6,9 +6,13 @@ within the next 15 minutes and alerts the user via macOS speech synthesis.
 
 ## Usage
 
+Manual run
+
 ```bash
 python check_power.py <accountNumber>
 ```
+
+Cron
 
 ```bash
 */15 * * * * /path/to/check_power.py <accountNumber>
