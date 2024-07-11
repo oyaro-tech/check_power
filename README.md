@@ -38,6 +38,7 @@ The script performs the following steps:
 - It handles JSON decoding errors and HTTP 404 errors from the API gracefully.
 - Be attentive hoursList start from 1 and go to 24 (python's datetime expected 0..23)
 - Electricity statuses: 0 - Power, 1 - Scheduled Power Outage, 2 - Possible Power Outage
+- You can also use graphs -> tomorrow if it available
 
 ## Example of API response:
 
