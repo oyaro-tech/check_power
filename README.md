@@ -44,7 +44,7 @@ The script performs the following steps:
 - It uses macOS specific commands (`say`) for audio alerts.
 - It handles JSON decoding errors and HTTP 404 errors from the API gracefully.
 - Be attentive hoursList start from 1 and go to 24 (python's datetime expected 0..23)
-- Electricity statuses: 0 - Power, 1 - Scheduled Power Outage, 2 - Possible Power Outage
+- Electricity statuses: 0 - Power, 1 - Scheduled Power Outage, 2 - Possible Power Outage but if we have 1 after 0 it be with no power too ;)
 - You can also use graphs -> tomorrow if it available
 
 ## Example of API response:
