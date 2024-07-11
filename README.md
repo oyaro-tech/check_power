@@ -15,11 +15,18 @@ python check_power.py <accountNumber>
 Cron
 
 ```bash
-*/15 * * * * /path/to/check_power.py <accountNumber>
+*/15 * * * * path/to/venv/bin/python /path/to/check_power.py <accountNumber>
 ```
 
 ## Requirements:
-    - Python 3.x requests library (install via `pip install requests`)
+
+- Python 3.x requests library (install via `pip install requests`)
+
+```bash
+python3 -m venv venv
+source ./venv/bin/activate
+pip install -r requirements.txt
+```
 
 ## Description
 
