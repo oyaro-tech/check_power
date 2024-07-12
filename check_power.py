@@ -197,48 +197,32 @@ def main():
 
     def check_outage(schedule):
         current_time = datetime.now()
-        warning_time = current_time + timedelta(minutes=15)
 
-        # Initialize previous_hour_status with the last known electricity_status
-        previous_hour = current_time - timedelta(hours=1)
-
-        if schedule['hoursList']:
-            previous_hour_status = int(schedule['hoursList'][previous_hour.hour]['electricity'])
-        else:
-            previous_hour_status = None
-        
-        for i, hour_info in enumerate(schedule['hoursList']):
-            hour = int(hour_info['hour'])
+        for i, hour_info in enumerate(schedule["hoursList"]):
+            hour = int(hour_info["hour"])
 
             if hour == 24:
                 hour = 0
 
-            electricity_status = int(hour_info['electricity'])
-            next_electricity_status = int(schedule['hoursList'][(i+1) % len(schedule['hoursList'])]['electricity'])
+            current_status = int(hour_info["electricity"])
 
-            outage_start = datetime.combine(current_time.date(), datetime.min.time()) + timedelta(hours=hour-1)
-            outage_end = outage_start + timedelta(hours=1)
+            if current_time.hour == hour:
 
-            if electricity_status == 0:
-                continue
-            
-            # Check if the next hour indicates an outage
-            if next_electricity_status == 1:
-                electricity_status = 1
-            elif next_electricity_status == 2:
-                electricity_status = 2
+                warning_time = current_time + timedelta(minutes=15)
+                outage_time = current_time.replace(hour=hour, minute=0, second=0, microsecond=0) + timedelta(hours=1)
 
-            # Check if outage is within the next 15 minutes
-            if current_time < outage_start <= warning_time and previous_hour_status == 0:
-                if electricity_status == 1:
-                    return "A scheduled power outage is expected in 15 minutes"
-                elif electricity_status == 2:
-                    return "A possible power outage is expected in 15 minutes"
-            
-            # Store the current hour's status for the next iteration
-            previous_hour_status = electricity_status
-        
-        return None 
+                if current_time < outage_time <= warning_time:
+                    next_hour_index = (i + 1) % len(schedule["hoursList"])
+                    next_hour_status = int(schedule["hoursList"][next_hour_index]["electricity"])
+                    
+                    if current_status == 0 and next_hour_status == 1:
+                        return "A scheduled power outage is expected in 15 minutes"
+                    elif current_status == 2 and next_hour_status == 1:
+                        return "A scheduled power outage is expected in 15 minutes"
+                    elif current_status == 0 and next_hour_status == 2:
+                        return "A possible power outage is expected in 15 minutes"
+    
+        return None
 
     today_outage_message = check_outage(data['graphs']['today'])
 
