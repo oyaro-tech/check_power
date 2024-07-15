@@ -188,7 +188,7 @@ def main():
     # Parse the JSON response
     try:
         data = response.json()
-        #print(json.dumps(data, indent=2))
+        print(json.dumps(data, indent=2))
     except json.JSONDecodeError as e:
         sys.exit(f"Error parsing JSON response: {e}")
 
@@ -198,20 +198,20 @@ def main():
 
     def check_outage(schedule):
         current_time = datetime.now()
-        current_hour = current_time.hour
+        current_hour = (current_time.hour + 1) % 24
         warning_hour = (current_hour + 1) % 24
 
         current_status = schedule["today"]["hoursList"][current_hour]["electricity"]
         warning_status = schedule["today"]["hoursList"][warning_hour]["electricity"]
+
+        print(f"Current status: {current_status}")
+        print(f"Warning status: {current_status}")
 
         if current_status == 0:
             if warning_status == 1:
                 return "A scheduled power outage is expected in 15 minutes"
             elif warning_status == 2:
                 return "A possible power outage is expected in 15 minutes"
-        elif current_status == 1:
-            if warning_status == 0:
-                return "A scheduled power restoration is expected in 15 minutes"
 
         return None
 
