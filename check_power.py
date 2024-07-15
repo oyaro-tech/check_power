@@ -188,7 +188,6 @@ def main():
     # Parse the JSON response
     try:
         data = response.json()
-        print(json.dumps(data, indent=2))
     except json.JSONDecodeError as e:
         sys.exit(f"Error parsing JSON response: {e}")
 
@@ -203,9 +202,6 @@ def main():
 
         current_status = schedule["today"]["hoursList"][current_hour]["electricity"]
         warning_status = schedule["today"]["hoursList"][warning_hour]["electricity"]
-
-        print(f"Current status: {current_status}")
-        print(f"Warning status: {current_status}")
 
         if current_status == 0:
             if warning_status == 1:
