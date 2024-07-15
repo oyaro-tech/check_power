@@ -188,6 +188,7 @@ def main():
     # Parse the JSON response
     try:
         data = response.json()
+        #print(json.dumps(data, indent=2))
     except json.JSONDecodeError as e:
         sys.exit(f"Error parsing JSON response: {e}")
 
@@ -197,37 +198,27 @@ def main():
 
     def check_outage(schedule):
         current_time = datetime.now()
+        current_hour = current_time.hour
+        warning_hour = (current_hour + 1) % 24
 
-        for i, hour_info in enumerate(schedule["hoursList"]):
-            hour = int(hour_info["hour"])
+        current_status = schedule["today"]["hoursList"][current_hour]["electricity"]
+        warning_status = schedule["today"]["hoursList"][warning_hour]["electricity"]
 
-            if hour == 24:
-                hour = 0
+        if current_status == 0:
+            if warning_status == 1:
+                return "A scheduled power outage is expected in 15 minutes"
+            elif warning_status == 2:
+                return "A possible power outage is expected in 15 minutes"
+        elif current_status == 1:
+            if warning_status == 0:
+                return "A scheduled power restoration is expected in 15 minutes"
 
-            current_status = int(hour_info["electricity"])
-
-            if current_time.hour == hour:
-
-                warning_time = current_time + timedelta(minutes=15)
-                outage_time = current_time.replace(hour=hour, minute=0, second=0, microsecond=0) + timedelta(hours=1)
-
-                if current_time < outage_time <= warning_time:
-                    next_hour_index = (i + 1) % len(schedule["hoursList"])
-                    next_hour_status = int(schedule["hoursList"][next_hour_index]["electricity"])
-                    
-                    if current_status == 0 and next_hour_status == 1:
-                        return "A scheduled power outage is expected in 15 minutes"
-                    elif current_status == 2 and next_hour_status == 1:
-                        return "A scheduled power outage is expected in 15 minutes"
-                    elif current_status == 0 and next_hour_status == 2:
-                        return "A possible power outage is expected in 15 minutes"
-    
         return None
 
-    today_outage_message = check_outage(data['graphs']['today'])
+    outage_message = check_outage(data['graphs'])
 
-    if today_outage_message:
-        macos_say(today_outage_message)
+    if outage_message:
+        macos_say(outage_message)
         sys.exit()
 
 if __name__ == "__main__":
