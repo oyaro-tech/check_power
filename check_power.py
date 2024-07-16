@@ -203,8 +203,6 @@ def main():
         next_data = next((item for item in data if int(item["hour"]) == (current_hour + 1) % 24), None)
 
         if current_data and next_data:
-            print(f"Current: {current_data}\nNext: {next_data}")
-
             if minutes_to_next_hour <= 15:
                 if current_data["electricity"] == 0 and next_data["electricity"] == 1:
                     return "A scheduled power outage is expected in 15 minutes"
@@ -216,6 +214,22 @@ def main():
         return None
 
     outage_message = check_outage(data["graphs"]["today"]["hoursList"])
+
+#    data = [
+#        {"hour": "1", "electricity": 1}, {"hour": "2", "electricity": 1},
+#        {"hour": "3", "electricity": 1}, {"hour": "4", "electricity": 0},
+#        {"hour": "5", "electricity": 0}, {"hour": "6", "electricity": 0},
+#        {"hour": "7", "electricity": 1}, {"hour": "8", "electricity": 1},
+#        {"hour": "9", "electricity": 1}, {"hour": "10", "electricity": 1},
+#        {"hour": "11", "electricity": 1}, {"hour": "12", "electricity": 0},
+#        {"hour": "13", "electricity": 0}, {"hour": "14", "electricity": 0},
+#        {"hour": "15", "electricity": 0}, {"hour": "16", "electricity": 0},
+#        {"hour": "17", "electricity": 1}, {"hour": "18", "electricity": 1},
+#        {"hour": "19", "electricity": 0}, {"hour": "20", "electricity": 0},
+#        {"hour": "21", "electricity": 1}, {"hour": "22", "electricity": 1},
+#        {"hour": "23", "electricity": 1}, {"hour": "24", "electricity": 1}
+#    ]
+#    outage_message = check_outage(data)
 
     if outage_message:
         macos_say(outage_message)
