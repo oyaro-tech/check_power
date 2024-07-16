@@ -149,7 +149,6 @@ import subprocess
 from datetime import datetime, timedelta
 
 def main():
-    # Check command line arguments
     if len(sys.argv) != 2:
         sys.exit(f"Usage: {sys.argv[0]} <accountNumber>")
 
@@ -181,11 +180,9 @@ def main():
 
     response = requests.post(url, headers=headers, data=payload)
 
-    # Check for 404 response
     if response.status_code == 404:
         sys.exit(f"Error: The account number {account_number} is incorrect.")
 
-    # Parse the JSON response
     try:
         data = response.json()
     except json.JSONDecodeError as e:
@@ -194,24 +191,31 @@ def main():
     def macos_say(message):
         # You can use any other voice model. The clearest voice I found in "Samantha"
         subprocess.call(["/usr/bin/say", "-v", "Bahh", "--quality", "127", "-i", message])
+        
+    def check_outage(data):
+        now = datetime.now()
+        current_hour = now.hour 
+        current_minute = now.minute
 
-    def check_outage(schedule):
-        current_time = datetime.now()
-        current_hour = (current_time.hour + 1) % 24
-        warning_hour = (current_hour + 1) % 24
+        minutes_to_next_hour = 60 - current_minute
 
-        current_status = schedule["today"]["hoursList"][current_hour]["electricity"]
-        warning_status = schedule["today"]["hoursList"][warning_hour]["electricity"]
+        current_data = next((item for item in data if int(item["hour"]) == current_hour), None)
+        next_data = next((item for item in data if int(item["hour"]) == (current_hour + 1) % 24), None)
 
-        if current_status == 0:
-            if warning_status == 1:
-                return "A scheduled power outage is expected in 15 minutes"
-            elif warning_status == 2:
-                return "A possible power outage is expected in 15 minutes"
+        if current_data and next_data:
+            print(f"Current: {current_data}\nNext: {next_data}")
+
+            if minutes_to_next_hour <= 15:
+                if current_data["electricity"] == 0 and next_data["electricity"] == 1:
+                    return "A scheduled power outage is expected in 15 minutes"
+                elif current_data["electricity"] == 0 and next_data["electricity"] == 2:
+                    return "A possible power outage is expected in 15 minutes"
+                elif (current_data["electricity"] == 1 or current_data["electricity"] == 2) and next_data["electricity"] == 0:
+                    return "A power restoring is expected in 15 minutes"
 
         return None
 
-    outage_message = check_outage(data['graphs'])
+    outage_message = check_outage(data["graphs"]["today"]["hoursList"])
 
     if outage_message:
         macos_say(outage_message)
