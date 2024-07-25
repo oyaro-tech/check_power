@@ -1,5 +1,8 @@
 # Check Power
 
+> [!CAUTION]
+> Currently script not works as expected.
+
 This script fetches information about scheduled power outages for a specific account number
 from an API endpoint. It checks if there's a scheduled or possible power outage expected
 within the next 15 minutes and alerts the user via macOS speech synthesis.
